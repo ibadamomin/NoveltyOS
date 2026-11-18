@@ -4,10 +4,12 @@ import { useCallback, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { colors, Empty, ListRow, SearchBox, Segmented, styles } from '../../components/ui';
 import { invoiceNumber, listInvoices, type Invoice, type InvoiceKind } from '../../lib/db';
+import { useDataVersion } from '../../lib/use-data-version';
 import { formatDateTime, money } from '../../lib/money';
 
 export default function History() {
   const db = useSQLiteContext();
+  const version = useDataVersion();
   const [kind, setKind] = useState<InvoiceKind | 'all'>('sale');
   const [search, setSearch] = useState('');
   const [rows, setRows] = useState<Invoice[]>([]);
@@ -15,7 +17,8 @@ export default function History() {
   useFocusEffect(
     useCallback(() => {
       listInvoices(db, kind, search).then(setRows);
-    }, [db, kind, search]),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [db, kind, search, version]),
   );
 
   return (

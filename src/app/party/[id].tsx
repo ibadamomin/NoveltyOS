@@ -18,13 +18,15 @@ import {
 import { buildStatementHtml, shareDocument } from '../../lib/documents';
 import { centsToInput, formatDate, money, parseMoney } from '../../lib/money';
 import { useSettings } from '../../lib/settings-context';
+import { useDataVersion } from '../../lib/use-data-version';
 
 export default function PartyScreen() {
   const db = useSQLiteContext();
   const { settings } = useSettings();
+  const version = useDataVersion();
   const params = useLocalSearchParams<{ id: string; type?: PartyType }>();
   const isNew = params.id === 'new';
-  const id = isNew ? undefined : Number(params.id);
+  const id = isNew ? undefined : params.id;
 
   const [party, setParty] = useState<Party | null>(null);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
@@ -50,7 +52,8 @@ export default function PartyScreen() {
       setOpening(centsToInput(p.opening_balance));
     }
     setLedger(await partyLedger(db, id));
-  }, [db, id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [db, id, version]);
 
   useFocusEffect(
     useCallback(() => {

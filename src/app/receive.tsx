@@ -10,7 +10,7 @@ import { createInvoice, findByBarcode, saveProduct, type Party, type PayMethod, 
 import { centsToInput, money, parseMoney, parseQty } from '../lib/money';
 
 type Draft = {
-  product_id: number | null; // null = brand new product
+  product_id: string | null; // null = brand new product
   name: string;
   barcode: string | null;
   qtyText: string;
@@ -20,7 +20,7 @@ type Draft = {
 };
 
 type Item = {
-  product_id: number | null;
+  product_id: string | null;
   name: string;
   barcode: string | null;
   qty: number;

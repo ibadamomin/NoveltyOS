@@ -5,10 +5,12 @@ import { Alert, FlatList, Text, View } from 'react-native';
 import { Scanner } from '../../components/Scanner';
 import { Button, colors, Empty, ListRow, SearchBox, styles } from '../../components/ui';
 import { findByBarcode, listProducts, type Product } from '../../lib/db';
+import { useDataVersion } from '../../lib/use-data-version';
 import { money } from '../../lib/money';
 
 export default function Inventory() {
   const db = useSQLiteContext();
+  const version = useDataVersion();
   const [search, setSearch] = useState('');
   const [rows, setRows] = useState<Product[]>([]);
   const [scanning, setScanning] = useState(false);
@@ -16,7 +18,8 @@ export default function Inventory() {
   useFocusEffect(
     useCallback(() => {
       listProducts(db, search).then(setRows);
-    }, [db, search]),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [db, search, version]),
   );
 
   const onScanned = async (code: string) => {

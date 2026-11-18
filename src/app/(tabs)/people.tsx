@@ -4,10 +4,12 @@ import { useCallback, useState } from 'react';
 import { FlatList, Text, View } from 'react-native';
 import { Button, Card, colors, Empty, ListRow, SearchBox, Segmented, styles } from '../../components/ui';
 import { listParties, type Party, type PartyType } from '../../lib/db';
+import { useDataVersion } from '../../lib/use-data-version';
 import { money } from '../../lib/money';
 
 export default function People() {
   const db = useSQLiteContext();
+  const version = useDataVersion();
   const [type, setType] = useState<PartyType>('customer');
   const [search, setSearch] = useState('');
   const [rows, setRows] = useState<Party[]>([]);
@@ -15,7 +17,8 @@ export default function People() {
   useFocusEffect(
     useCallback(() => {
       listParties(db, type, search).then(setRows);
-    }, [db, type, search]),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [db, type, search, version]),
   );
 
   const outstanding = rows.reduce((s, p) => s + Math.max(p.balance, 0), 0);

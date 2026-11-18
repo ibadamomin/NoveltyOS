@@ -17,7 +17,7 @@ export default function InvoiceScreen() {
   const [busy, setBusy] = useState<string | null>(null);
 
   useEffect(() => {
-    getInvoice(db, Number(id)).then(async (d) => {
+    getInvoice(db, id).then(async (d) => {
       setData(d);
       if (d?.invoice.party_id) setAcctBalance(await partyBalance(db, d.invoice.party_id));
     });

@@ -1,9 +1,10 @@
 {
-  "name": "stockbook",
+  "name": "noveltyos",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
+    "@supabase/supabase-js": "^2.119.0",
     "eslint-config-expo": "~58.0.4",
     "expo": "~58.0.26",
     "expo-camera": "~58.0.14",
@@ -22,7 +23,9 @@
     "react-native-web": "~0.21.4"
   },
   "devDependencies": {
+    "@types/pg": "^8.23.1",
     "@types/react": "~19.3.0",
+    "pg": "^8.23.1",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -31,7 +34,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "test": "node --no-warnings --import ./tests/ts-resolve.mjs tests/accounting.test.mts",
+    "test:cloud": "tests/run-cloud-tests.sh"
   },
   "private": true
 }

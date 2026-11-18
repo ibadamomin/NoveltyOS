@@ -12,7 +12,7 @@ export default function ProductScreen() {
   const db = useSQLiteContext();
   const params = useLocalSearchParams<{ id: string; barcode?: string }>();
   const isNew = params.id === 'new';
-  const id = isNew ? undefined : Number(params.id);
+  const id = isNew ? undefined : params.id;
 
   const [name, setName] = useState('');
   const [barcode, setBarcode] = useState(params.barcode ?? '');

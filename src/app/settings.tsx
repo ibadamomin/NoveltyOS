@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Text } from 'react-native';
-import { Button, Card, colors, Field, Screen } from '../components/ui';
+import { Button, Card, colors, Field, ListRow, Screen } from '../components/ui';
 import type { Settings } from '../lib/db';
 import { useSettings } from '../lib/settings-context';
 
@@ -20,6 +20,9 @@ export default function SettingsScreen() {
 
   return (
     <Screen>
+      <Card style={{ paddingVertical: 4 }}>
+        <ListRow icon="cloud-outline" title="Cloud backup & sync" subtitle="Back up your records and use more than one phone" onPress={() => router.push('/account')} />
+      </Card>
       <Text style={{ color: colors.muted, marginBottom: 12 }}>These details appear on every invoice and receipt.</Text>
       <Card>
         <Field label="Business name" value={s.businessName} onChangeText={set('businessName')} />

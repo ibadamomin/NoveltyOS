@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "StockBook",
-    "slug": "stockbook",
+    "name": "noveltyOS",
+    "slug": "noveltyos",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.stockbook.app",
+      "bundleIdentifier": "com.noveltyos.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "StockBook uses the camera to scan product barcodes and QR codes."
+        "NSCameraUsageDescription": "noveltyOS uses the camera to scan product barcodes and QR codes."
       }
     },
     "android": {
@@ -21,7 +21,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.stockbook.app",
+      "package": "com.noveltyos.app",
       "permissions": [
         "android.permission.CAMERA"
       ]
@@ -36,11 +36,11 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "StockBook uses the camera to scan product barcodes and QR codes.",
+          "cameraPermission": "noveltyOS uses the camera to scan product barcodes and QR codes.",
           "recordAudioAndroid": false
         }
       ]
     ],
-    "scheme": "stockbook"
+    "scheme": "noveltyos"
   }
 }

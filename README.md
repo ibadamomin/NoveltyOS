@@ -1,88 +1,145 @@
-# StockBook — inventory, sales & invoices for small sellers
+# noveltyOS
 
-A simple phone app for iPhone and Android for small sellers who work from a garage, a market stall or the back of a car.
-Scan a barcode or QR code when stock comes in, scan it again when you sell it, and the app keeps your stock,
-cash, customer balances and supplier balances in sync for you.
+**Inventory, sales, invoices and accounts for small sellers. Works offline, backs up to the cloud, and runs on iPhone and Android.**
 
-Built with **Expo (React Native)**, so one codebase runs on both iOS and Android.
-All data is stored **on the phone** (SQLite) and works without internet.
+noveltyOS is built for businesses that sell novelty and convenience-store merchandise from a garage, a market stall
+or the back of a car. Scan a barcode or QR code when stock arrives, scan it again when you sell it, and noveltyOS keeps
+stock, cash, customer balances and supplier balances in sync, so there's nothing to balance by hand.
 
-## What it does
+- **One codebase for iOS and Android:** Expo / React Native.
+- **Offline-first:** every phone has its own SQLite database and works without signal.
+- **Cloud backup and multi-phone sync:** Supabase (Postgres plus login). Each business's data is isolated with row-level security.
 
-| Area | Features |
+---
+
+## Features
+
+| Area | What it does |
 |---|---|
-| **Receive Stock** (purchases) | Scan each item, then enter the quantity, your cost and the selling price. New barcodes become new products automatically. Pick a supplier and enter what you paid. Anything unpaid goes on that supplier's account (accounts payable). |
-| **Sell** | Scan items one after another, with the camera staying open for fast checkout. Change quantities or prices, pick a customer or "walk-in", and take Cash, Card or Other. The app shows the change to give, or how much goes on the customer's account (accounts receivable). |
-| **Invoices & receipts** | Every sale gets an invoice number. Send it as a full-page **invoice PDF** or a narrow **receipt PDF** by text, email or WhatsApp, or print it. Each one shows the amount paid, the balance due and the customer's total account balance. |
-| **Accounts** | Customers and suppliers with live balances. Record cash or card payments in a couple of taps. Full history for each one. Share an **account statement** PDF with a running balance. You can enter a starting balance for debts from before the app. |
-| **Inventory** | Search by name or barcode, or scan to find a product. Stock levels show in colour, with low-stock alerts. Each product has a history of every purchase and sale. You can still add items that have no barcode. |
-| **Home dashboard** | Sales, profit, cash in, cash out and **net cash for the period** (today, 7 days or 30 days), so you can check the cash box. Also shows total receivable, total payable, stock value at cost and items running low. |
-| **Mistakes** | Void a sale or purchase and the stock and balances are reversed automatically. You can also delete a payment. |
-| **Settings** | Business name, address, phone, email, sales-tax %, currency symbol and receipt footer. These make the app white-label for each business that uses it. |
+| **Receive Stock** (purchases) | Scan each item, then enter the quantity, your cost and the selling price. New barcodes become new products. Pick the supplier and enter what you paid. The rest goes on that supplier's account (**accounts payable**). |
+| **Sell** | Scan items one after another; the camera stays open. Edit quantities or prices, pick a customer or "walk-in", and take Cash, Card or Other. The app shows the change to give, or how much goes on the customer's account (**accounts receivable**). |
+| **Invoices and receipts** | Send a full-page invoice or a narrow receipt as a PDF (text, email, WhatsApp), or print it. Each one shows the amount paid, the balance due and the customer's running account balance. |
+| **Accounts** | Customers and suppliers with live balances, one-tap **cash payments**, full history, shareable account statements, and starting balances for debts from before noveltyOS. |
+| **Inventory** | Search or scan to find a product. Colour-coded stock levels, low-stock alerts and a history of every movement. Items without barcodes are supported. |
+| **Dashboard** | Sales, profit, cash in, cash out and **net cash** (what the cash box should have changed by), for today, 7 days or 30 days. Also shows total receivable, total payable and stock value. |
+| **Cloud backup and sync** | Create an account and your records are backed up. Add more phones or employees with an **invite code**. Changes sync automatically within seconds when online. |
+| **Fixing mistakes** | Void a sale or purchase, or delete a payment. Stock and balances correct themselves. |
 
-### How balancing works
-Money is stored as whole cents, so totals never drift. Balances are **never typed in by hand**. They are always
-calculated from the records:
+### Why the numbers always balance
+- Money is stored as whole **cents**, so totals never drift.
+- **Balances and stock on hand are never typed in or stored.** They are always calculated from the underlying records:
+  ```
+  stock on hand    = Σ purchased − Σ sold + Σ count corrections
+  customer balance = starting balance + Σ(sale total − paid at sale) − Σ payments received
+  supplier balance = starting balance + Σ(purchase total − paid at purchase) − Σ payments made
+  ```
+  Because of this, two phones selling at the same moment can never overwrite each other's sales.
 
-```
-customer balance = starting balance + Σ(sale totals − paid at sale) − Σ(payments received)
-supplier balance = starting balance + Σ(purchase totals − paid at purchase) − Σ(payments made)
-cash in  = cash paid at sales + cash payments received
-cash out = cash paid for purchases + cash payments to suppliers
-```
+---
 
-## Try it on your phone (about 5 minutes)
+## Run it on your phone (5 minutes, no cloud needed)
 
 1. Install **Expo Go** from the App Store or Google Play.
 2. On a computer with Node.js 20 or later:
    ```bash
-   cd stockbook
    npm install
    npx expo start
    ```
-3. Scan the QR code shown in the terminal with your phone's camera (iPhone) or with the Expo Go app (Android).
+3. Scan the QR code with your phone's camera (iPhone) or with the Expo Go app (Android).
+
+Without cloud settings, noveltyOS runs fully offline and the cloud screen says sync isn't set up.
+
+## Turn on the cloud (Supabase, free tier is enough to start)
+
+1. Create a project at [supabase.com](https://supabase.com).
+2. Create the database. In **SQL Editor**, paste and run
+   [`supabase/migrations/20261118000000_noveltyos_init.sql`](supabase/migrations/20261118000000_noveltyos_init.sql).
+   Or, with the Supabase CLI: `npx supabase link` then `npx supabase db push`.
+3. Configure login in **Authentication**:
+   - Keep the **Email** provider enabled.
+   - **Email Templates → Reset Password:** add `{{ .Token }}` to the message. The app's "Forgot password" flow asks for this 6-digit code.
+   - Optional: turn off **Confirm email** if you want new users to start immediately.
+4. Connect the app. Copy `.env.example` to `.env` and fill in the **Project URL** and **anon / publishable key** from
+   *Project Settings → API*, then restart `npx expo start`.
+   The anon key is designed to ship inside apps; the database's row-level security is what protects the data.
+   **Never** put the `service_role` key in the app.
+
+### How sync works
+- **Push:** rows changed on the phone (`dirty = 1`) are uploaded. The flag is cleared only if the row wasn't edited again during the upload.
+- **Pull:** rows changed on the server since the last pull are downloaded, ordered by the **server's** clock, so wrong phone clocks don't matter.
+  A short overlap window makes sure no change is ever missed.
+- Sales, purchases, payments and stock corrections are only ever added or voided, so they never conflict.
+  Edits to products, customers and settings use *last upload wins*, and every phone ends up with the same values.
+- Deletes are "soft" (`deleted = 1`) so they reach every phone.
+- Sync runs 2 seconds after any change, every minute while the app is open, when the app comes back to the screen, and from **Sync now**.
+
+### Security model
+- `businesses` and `members` link users to businesses. The owner shares an invite code; the `join_business` function adds staff.
+- Every data table has row-level security: a user can only read or write rows of businesses they belong to.
+  There is no delete permission at all; deletes happen through the `deleted` flag.
+- Only owners can rename the business, remove members or rotate the invite code.
+
+---
 
 ## Publish to the App Store and Google Play
 
-Builds happen in the cloud with EAS, so you don't need a Mac or Android Studio. You do need an
-[Apple Developer account](https://developer.apple.com/programs/) ($99/yr) and a
-[Google Play Console account](https://play.google.com/console) ($25 one-time).
+Builds run in the cloud with EAS, so you don't need a Mac. You need an Apple Developer account ($99/yr) and a Google Play Console account ($25 one-time).
 
 ```bash
 npx eas-cli@latest login
 npx eas-cli@latest build:configure
+# Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY as EAS environment variables
+# (expo.dev → your project → Environment variables; see https://docs.expo.dev/eas/environment-variables/)
 npx eas-cli@latest build --platform all
 npx eas-cli@latest submit --platform ios
 npx eas-cli@latest submit --platform android
 ```
 
-Before you publish, change `ios.bundleIdentifier` and `android.package` in `app.json` (currently `com.stockbook.app`)
-to an ID you own, and replace the icons in `assets/`.
+The app IDs are `com.noveltyos.app` (`app.json` → `ios.bundleIdentifier` / `android.package`). Change them if that ID is
+taken, and replace the icons in `assets/` before you submit.
 
-## Project layout
+---
 
-```
-src/app/                 screens (Expo Router — each file is a screen)
-  (tabs)/index.tsx       Home dashboard
-  (tabs)/sell.tsx        Sell / cart / checkout
-  (tabs)/inventory.tsx   Product list
-  (tabs)/people.tsx      Customers & suppliers
-  (tabs)/history.tsx     Sales & purchase records
-  receive.tsx            Receive stock (purchases)
-  product/[id].tsx       Add / edit product + movement history
-  party/[id].tsx         Customer/supplier account, payments, statement
-  invoice/[id].tsx       Invoice view, share/print, void
-  settings.tsx           Business settings
-src/lib/db.ts            Database schema and all bookkeeping logic
-src/lib/documents.ts     Invoice / receipt / statement PDFs
-src/components/          Scanner, pickers, shared UI
+## Development
+
+```bash
+npx tsc --noEmit     # typecheck
+npx expo lint        # lint
+npm test             # bookkeeping tests (real SQLite)
+npm run test:cloud   # two-phone sync + security tests against real Postgres
 ```
 
-Checks: `npx tsc --noEmit` (typecheck) and `npx expo lint`.
+`npm run test:cloud` needs a local PostgreSQL (`DATABASE_URL=postgres://postgres@localhost:5432 npm run test:cloud`).
+It loads a small stand-in for Supabase's `auth` schema (`tests/supabase-stub.sql`) plus the real migration, then
+simulates three phones and three users. It checks simultaneous offline sales, voids, conflicting edits, mid-sync edits,
+deletes, late-joining phones and that outsiders can't read or write anything.
 
-## Good next steps before selling to other businesses
-- **Backup / restore and multi-device sync.** Today the data lives only on one phone, so losing the phone means losing the
-  records. The usual next step is a cloud backend (for example Supabase) with a login per business. That also allows
-  subscriptions, more than one phone per business and a web dashboard.
-- CSV export for an accountant.
-- Optional PIN lock, and Bluetooth receipt printers.
+### Project layout
+```
+src/app/                    screens (Expo Router — each file is a screen)
+  (tabs)/index.tsx          Home dashboard
+  (tabs)/sell.tsx           Sell / cart / checkout
+  (tabs)/inventory.tsx      Product list
+  (tabs)/people.tsx         Customers & suppliers
+  (tabs)/history.tsx        Sales & purchase records
+  receive.tsx               Receive stock (purchases)
+  product/[id].tsx          Add / edit product + movement history
+  party/[id].tsx            Customer/supplier account, payments, statement
+  invoice/[id].tsx          Invoice view, share/print, void
+  account.tsx               Cloud login, business create/join, sync status
+  settings.tsx              Business settings
+src/lib/db.ts               Local database schema + all bookkeeping logic
+src/lib/sync.ts             Push/pull sync engine (backend-agnostic)
+src/lib/supabase.ts         Supabase client + sync adapter
+src/lib/cloud-context.tsx   Login state, business linking, auto-sync
+src/lib/documents.ts        Invoice / receipt / statement PDFs
+src/components/             Scanner, pickers, shared UI
+supabase/migrations/        Cloud database schema + security rules
+tests/                      Bookkeeping and cloud sync test suites
+```
+
+## Roadmap ideas
+- Subscriptions/billing per business (e.g. RevenueCat) for selling noveltyOS to other shops.
+- Web dashboard for owners (same Supabase backend).
+- CSV export for an accountant, PIN lock, Bluetooth receipt printers.
+- Staff permissions (e.g. staff can sell but not void).

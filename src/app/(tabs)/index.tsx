@@ -6,7 +6,9 @@ import { Pressable, Text, View } from 'react-native';
 import { Button, Card, colors, Empty, ListRow, Screen, SectionTitle, Segmented, Stat } from '../../components/ui';
 import { getSummary, startOfToday, type Summary } from '../../lib/db';
 import { money } from '../../lib/money';
+import { useCloud } from '../../lib/cloud-context';
 import { useSettings } from '../../lib/settings-context';
+import { useDataVersion } from '../../lib/use-data-version';
 
 type Period = 'today' | 'week' | 'month';
 
@@ -23,11 +25,16 @@ export default function Home() {
   const { settings } = useSettings();
   const [period, setPeriod] = useState<Period>('today');
   const [sum, setSum] = useState<Summary | null>(null);
+  const version = useDataVersion();
+  const { status } = useCloud();
+  const cloudIcon =
+    status === 'synced' ? 'cloud-done-outline' : status === 'syncing' ? 'cloud-upload-outline' : status === 'not-configured' || status === 'signed-out' || status === 'no-business' ? 'cloud-outline' : 'cloud-offline-outline';
 
   useFocusEffect(
     useCallback(() => {
       getSummary(db, since(period)).then(setSum);
-    }, [db, period]),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [db, period, version]),
   );
 
   return (
@@ -36,9 +43,16 @@ export default function Home() {
         options={{
           title: settings.businessName,
           headerRight: () => (
-            <Pressable onPress={() => router.push('/settings')} hitSlop={12} style={{ marginRight: 16 }} accessibilityLabel="Settings">
-              <Ionicons name="settings-outline" size={24} color="#fff" />
-            </Pressable>
+            <View style={{ flexDirection: 'row', gap: 20, marginRight: 16 }}>
+              {status !== 'not-configured' && (
+                <Pressable onPress={() => router.push('/account')} hitSlop={12} accessibilityLabel="Cloud backup and sync">
+                  <Ionicons name={cloudIcon} size={25} color="#fff" />
+                </Pressable>
+              )}
+              <Pressable onPress={() => router.push('/settings')} hitSlop={12} accessibilityLabel="Settings">
+                <Ionicons name="settings-outline" size={24} color="#fff" />
+              </Pressable>
+            </View>
           ),
         }}
       />

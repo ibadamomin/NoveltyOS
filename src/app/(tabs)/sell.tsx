@@ -11,7 +11,7 @@ import { centsToInput, money, parseMoney } from '../../lib/money';
 import { useSettings } from '../../lib/settings-context';
 
 type Line = {
-  product_id: number;
+  product_id: string;
   name: string;
   barcode: string | null;
   qty: number;
@@ -81,10 +81,10 @@ export default function Sell() {
     return `${p.name} — ${money(p.price)}${qty > 1 ? `  (×${qty} in cart)` : ''}`;
   };
 
-  const setQty = (id: number, qty: number) =>
+  const setQty = (id: string, qty: number) =>
     setLines((prev) => (qty <= 0 ? prev.filter((l) => l.product_id !== id) : prev.map((l) => (l.product_id === id ? { ...l, qty } : l))));
 
-  const setPrice = (id: number, text: string) =>
+  const setPrice = (id: string, text: string) =>
     setLines((prev) =>
       prev.map((l) => {
         if (l.product_id !== id) return l;

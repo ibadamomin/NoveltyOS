@@ -49,6 +49,12 @@ export async function joinBusiness(code: string): Promise<Business> {
   return data as Business;
 }
 
+/** Permanently delete the signed-in user's account (and any business they own, with all its records). */
+export async function deleteMyAccount() {
+  const { error } = await supabase!.rpc('delete_my_account');
+  if (error) throw error;
+}
+
 const conflictTarget = (t: SyncTable) => (t === 'settings' ? 'business_id,key' : 'business_id,id');
 
 export function supabaseRemote(businessId: string): Remote {

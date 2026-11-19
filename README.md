@@ -85,6 +85,12 @@ Without cloud settings, noveltyOS runs fully offline and the cloud screen says s
 
 ## Publish to the App Store and Google Play
 
+**Google Play:** everything for the listing is ready in [`docs/play-store/listing.md`](docs/play-store/listing.md).
+It has the store text, Data safety answers, content rating answers, graphics in `docs/play-store/graphics/`,
+and a step-by-step release checklist. The privacy policy and account-deletion pages are in [`docs/`](docs/).
+Build profiles are in `eas.json`: `preview` makes an installable APK, and `production` makes the App Bundle for Play.
+
+
 Builds run in the cloud with EAS, so you don't need a Mac. You need an Apple Developer account ($99/yr) and a Google Play Console account ($25 one-time).
 
 ```bash

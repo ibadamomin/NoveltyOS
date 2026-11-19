@@ -247,6 +247,7 @@ function ChooseBusiness() {
         />
       </Card>
       <Button title="Sign out" variant="ghost" onPress={signOut} />
+      <DeleteAccountButton />
     </>
   );
 }
@@ -308,6 +309,34 @@ function Connected() {
       </Card>
 
       <Button title="Sign out" variant="danger" icon="log-out-outline" onPress={confirmSignOut} style={{ marginTop: 8 }} />
+      <DeleteAccountButton />
     </>
   );
+}
+
+function DeleteAccountButton() {
+  const { deleteAccount } = useCloud();
+  const [busy, setBusy] = useState(false);
+  const confirm = async () => {
+    const first = await ask(
+      'Delete your account?',
+      'This permanently deletes your login. If you own a business, that business and ALL its cloud records (products, sales, customers, payments) are deleted for everyone in it. Records are also removed from this phone. This cannot be undone.',
+      [{ text: 'Continue', value: 'yes', destructive: true }],
+    );
+    if (!first) return;
+    const second = await ask('Are you absolutely sure?', 'Your account and data will be deleted now.', [
+      { text: 'Delete my account', value: 'yes', destructive: true },
+    ]);
+    if (!second) return;
+    setBusy(true);
+    try {
+      await deleteAccount();
+      Alert.alert('Account deleted', 'Your account and its data have been deleted.');
+    } catch (e) {
+      Alert.alert('Could not delete account', errMsg(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return <Button title="Delete account" variant="ghost" icon="trash-outline" onPress={confirm} loading={busy} style={{ marginTop: 16 }} />;
 }

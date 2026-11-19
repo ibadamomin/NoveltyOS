@@ -7,5 +7,5 @@ BASE=${DATABASE_URL:-postgres://postgres@localhost:5433}
 DB=noveltyos_test
 psql "$BASE/postgres" -qc "drop database if exists $DB" -c "create database $DB"
 psql "$BASE/$DB" -q -v ON_ERROR_STOP=1 -f tests/supabase-stub.sql
-psql "$BASE/$DB" -q -v ON_ERROR_STOP=1 -f supabase/migrations/20261118000000_noveltyos_init.sql
+for f in supabase/migrations/*.sql; do psql "$BASE/$DB" -q -v ON_ERROR_STOP=1 -f "$f"; done
 DATABASE_URL="$BASE/$DB" node --no-warnings --import ./tests/ts-resolve.mjs tests/sync.test.mts

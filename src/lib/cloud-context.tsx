@@ -3,7 +3,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { AppState } from 'react-native';
 import { countUnsynced, getMeta, markAllDirty, onDataChange, setMeta, wipeLocalData } from './db';
-import { supabase, supabaseRemote, type Business } from './supabase';
+import { deleteMyAccount, supabase, supabaseRemote, type Business } from './supabase';
 import { syncOnce } from './sync';
 
 export type CloudStatus = 'not-configured' | 'signed-out' | 'no-business' | 'synced' | 'syncing' | 'offline' | 'error';
@@ -21,6 +21,7 @@ type Ctx = {
   syncNow: () => Promise<void>;
   linkBusiness: (b: Business, mode: LinkMode) => Promise<void>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 };
 
 const CloudContext = createContext<Ctx | null>(null);
@@ -130,6 +131,11 @@ export function CloudProvider({ children }: { children: ReactNode }) {
     setError(null);
   }, [db]);
 
+  const deleteAccount = useCallback(async () => {
+    await deleteMyAccount();
+    await signOut(); // ends the session and clears this phone
+  }, [signOut]);
+
   const status: CloudStatus = !supabase
     ? 'not-configured'
     : !session
@@ -145,7 +151,7 @@ export function CloudProvider({ children }: { children: ReactNode }) {
             : 'synced';
 
   return (
-    <CloudContext.Provider value={{ status, session, business, lastSynced, error, unsynced, syncNow, linkBusiness, signOut }}>
+    <CloudContext.Provider value={{ status, session, business, lastSynced, error, unsynced, syncNow, linkBusiness, signOut, deleteAccount }}>
       {children}
     </CloudContext.Provider>
   );

@@ -159,5 +159,19 @@ assert.equal((await asUser(stranger, (c) => c.query('select * from businesses'))
 await assert.rejects(asUser(clerk, (c) => c.query(`select rotate_invite_code($1)`, [biz.id])), /Only the owner/);
 await assert.rejects(asUser(clerk, (c) => c.query(`delete from products where business_id = $1`, [biz.id]).then((x) => { if (x.rowCount) throw new Error('deleted!'); throw new Error('no delete'); })), /no delete/);
 
+// Account deletion: staff leaving keeps the business; the owner leaving removes it and all its records
+await assert.rejects(asUser(stranger, (c) => c.query('select public.delete_my_account()')).then(() => { throw new Error('ran'); }).catch((e) => { if (e.message === 'ran') throw new Error('ok'); throw e; }), /ok/); // stranger with no business: allowed, deletes only themselves
+assert.equal((await pool.query('select count(*)::int n from auth.users where id = $1', [stranger])).rows[0].n, 0);
+await asUser(clerk, (c) => c.query('select public.delete_my_account()'));
+assert.equal((await pool.query('select count(*)::int n from members where user_id = $1', [clerk])).rows[0].n, 0, 'clerk membership gone');
+assert.equal((await pool.query('select count(*)::int n from products where business_id = $1', [biz.id])).rows[0].n, 1, 'business data kept when staff leaves');
+await asUser(owner, (c) => c.query('select public.delete_my_account()'));
+for (const t of ['businesses', 'products', 'invoices', 'invoice_items', 'payments', 'parties', 'settings', 'stock_adjustments']) {
+  const col = t === 'businesses' ? 'id' : 'business_id';
+  assert.equal((await pool.query(`select count(*)::int n from ${t} where ${col} = $1`, [biz.id])).rows[0].n, 0, `${t} deleted with owner`);
+}
+assert.equal((await pool.query('select count(*)::int n from auth.users where id = $1', [owner])).rows[0].n, 0, 'owner login deleted');
+await assert.rejects(pool.query(`set role anon; select public.delete_my_account()`).finally(() => pool.query('reset role')), /permission denied/);
+
 console.log('ALL CLOUD SYNC TESTS PASSED');
 await pool.end();

@@ -17,7 +17,7 @@ export default function TabsLayout() {
         headerTintColor: '#fff',
         headerTitleStyle: { fontWeight: '700' },
         tabBarActiveTintColor: colors.primary,
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
+        tabBarLabelStyle: { fontWeight: '600' },
       }}
     >
       <Tabs.Screen name="index" options={tab('Home', 'home')} />

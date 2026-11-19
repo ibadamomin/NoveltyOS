@@ -59,7 +59,7 @@ export default function Home() {
 
       <View style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
         <Button title="New Sale" icon="cart" onPress={() => router.navigate('/sell')} style={{ flex: 1 }} />
-        <Button title="Receive Stock" icon="download" onPress={() => router.push('/receive')} style={{ flex: 1 }} />
+        <Button title="Receive Stock" icon="download" variant="accent" onPress={() => router.push('/receive')} style={{ flex: 1 }} />
       </View>
       <View style={{ flexDirection: 'row', gap: 10, marginBottom: 18 }}>
         <Button title="Add Product" icon="add-circle-outline" variant="secondary" small onPress={() => router.push('/product/new')} style={{ flex: 1 }} />

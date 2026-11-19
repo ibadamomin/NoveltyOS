@@ -174,7 +174,7 @@ export default function Receive() {
         </Card>
       ) : (
         <>
-          <Button title={items.length ? 'Scan next item' : 'Scan item'} icon="scan" onPress={() => setScanning(true)} />
+          <Button title={items.length ? 'Scan next item' : 'Scan item'} icon="scan" variant="accent" onPress={() => setScanning(true)} />
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 10, marginBottom: 14 }}>
             <Button title="Existing product" small variant="secondary" icon="search" onPress={() => setPicking('product')} style={{ flex: 1 }} />
             <Button title="No barcode" small variant="secondary" icon="add" onPress={() => startDraft(null, null)} style={{ flex: 1 }} />
@@ -243,7 +243,7 @@ export default function Receive() {
               <Text style={{ color: colors.warn }}>{supplier ? `Added to ${supplier.name}'s balance.` : 'Choose a supplier above.'}</Text>
             </Card>
           )}
-          <Button title="Save & add to inventory" icon="checkmark-circle" onPress={save} loading={saving} />
+          <Button title="Save & add to inventory" icon="checkmark-circle" variant="accent" onPress={save} loading={saving} />
         </>
       )}
 

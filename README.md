@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/brand/logo.svg" alt="noveltyOS logo" width="160"></p>
+
 # noveltyOS
 
 **Inventory, sales, invoices and accounts for small sellers. Works offline, backs up to the cloud, and runs on iPhone and Android.**
@@ -99,6 +101,12 @@ The app IDs are `com.noveltyos.app` (`app.json` → `ios.bundleIdentifier` / `an
 taken, and replace the icons in `assets/` before you submit.
 
 ---
+
+## Brand assets
+- `assets/brand/logo.svg`: vector logo, rebuilt from `assets/brand/logo-original.jpg`. Use it for print, web and the store listing.
+- Brand colours (also in `src/components/ui.tsx` as `brand`): navy `#0E2E4B`, teal `#27A19F`, orange `#EE8733`, tan `#E1B479`, paper `#F5F7F6`.
+  Buttons use a slightly darker teal (`#187A78`) so white text on them stays readable.
+- App icons (`assets/icon.png`, `android-icon-*.png`), splash image, favicon and the in-app `logo.png` are all generated from the SVG.
 
 ## Development
 

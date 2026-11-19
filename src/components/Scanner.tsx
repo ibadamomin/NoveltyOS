@@ -3,7 +3,7 @@ import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'ex
 import { useRef, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, colors } from './ui';
+import { brand, Button, colors } from './ui';
 
 type Props = {
   visible: boolean;
@@ -140,7 +140,7 @@ const s = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
   title: { color: '#fff', fontSize: 18, fontWeight: '700' },
   cameraBox: { flex: 1, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' },
-  frame: { width: '78%', height: 180, borderWidth: 3, borderColor: '#5eead4', borderRadius: 16 },
+  frame: { width: '78%', height: 180, borderWidth: 3, borderColor: brand.teal, borderRadius: 16 },
   permission: { alignItems: 'center', gap: 16, padding: 24 },
   permissionText: { color: '#fff', fontSize: 16, textAlign: 'center' },
   flash: {

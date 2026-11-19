@@ -12,11 +12,21 @@ import {
   type ViewStyle,
 } from 'react-native';
 
+// Brand colours from the noveltyOS logo (navy outline, teal & orange arrows, tan box).
+export const brand = {
+  navy: '#0E2E4B',
+  teal: '#27A19F',
+  orange: '#EE8733',
+  tan: '#E1B479',
+  paper: '#F5F7F6',
+};
+
 export const colors = {
-  primary: '#0f766e',
-  primaryDark: '#115e59',
-  primarySoft: '#ccfbf1',
-  bg: '#f4f5f7',
+  primary: brand.navy,
+  primaryDark: '#0A2238',
+  primarySoft: '#DDF1EF', // light tint of the logo teal
+  accent: '#187A78', // logo teal, darkened so white text on it stays readable (5:1)
+  bg: brand.paper,
   card: '#ffffff',
   text: '#111827',
   muted: '#6b7280',
@@ -57,7 +67,7 @@ export function SectionTitle({ children, right }: { children: ReactNode; right?:
   );
 }
 
-type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
+type ButtonVariant = 'primary' | 'accent' | 'secondary' | 'danger' | 'ghost';
 
 export function Button({
   title,
@@ -107,6 +117,7 @@ export function Button({
 
 const buttonVariants: Record<ButtonVariant, { bg: string; fg: string; border: string }> = {
   primary: { bg: colors.primary, fg: '#fff', border: colors.primary },
+  accent: { bg: colors.accent, fg: '#fff', border: colors.accent },
   secondary: { bg: '#fff', fg: colors.primary, border: colors.primary },
   danger: { bg: '#fff', fg: colors.danger, border: colors.danger },
   ghost: { bg: 'transparent', fg: colors.primary, border: 'transparent' },

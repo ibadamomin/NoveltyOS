@@ -38,7 +38,7 @@ export default function Inventory() {
   return (
     <View style={[styles.screen, { padding: 16, paddingBottom: 0 }]}>
       <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
-        <Button title="Receive stock" icon="download" onPress={() => router.push('/receive')} style={{ flex: 1 }} small />
+        <Button title="Receive stock" icon="download" variant="accent" onPress={() => router.push('/receive')} style={{ flex: 1 }} small />
         <Button title="New product" icon="add" variant="secondary" onPress={() => router.push('/product/new')} style={{ flex: 1 }} small />
       </View>
       <View style={{ flexDirection: 'row', gap: 10 }}>

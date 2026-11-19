@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
-import { Alert, Share, Text, View } from 'react-native';
+import { Alert, Image, Share, Text, View } from 'react-native';
 import { Button, Card, colors, Field, ListRow, Screen, SectionTitle, Segmented } from '../components/ui';
 import { useCloud, type LinkMode } from '../lib/cloud-context';
 import { countUnsynced, getMeta, hasLocalData } from '../lib/db';
@@ -99,8 +99,9 @@ function AuthForm() {
   return (
     <>
       <Card style={{ alignItems: 'center' }}>
-        <Ionicons name="cloud-outline" size={44} color={colors.primary} />
-        <Text style={{ fontSize: 18, fontWeight: '800', marginTop: 6 }}>Back up & sync your business</Text>
+        <Image source={require('../../assets/logo.png')} style={{ width: 96, height: 88 }} accessibilityLabel="noveltyOS logo" />
+        <Text style={{ fontSize: 22, fontWeight: '800', color: colors.primary, marginTop: 8 }}>noveltyOS</Text>
+        <Text style={{ fontSize: 17, fontWeight: '700', marginTop: 8 }}>Back up & sync your business</Text>
         <Text style={{ color: colors.muted, textAlign: 'center', marginTop: 4 }}>
           Keep your records safe if you lose your phone, and use noveltyOS on more than one phone.
         </Text>

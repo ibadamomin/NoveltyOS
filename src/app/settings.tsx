@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Text } from 'react-native';
+import Constants from 'expo-constants';
+import { Alert, Image, Text, View } from 'react-native';
 import { Button, Card, colors, Field, ListRow, Screen } from '../components/ui';
 import type { Settings } from '../lib/db';
 import { useSettings } from '../lib/settings-context';
@@ -36,6 +37,11 @@ export default function SettingsScreen() {
         <Field label="Receipt footer" value={s.footer} onChangeText={set('footer')} />
       </Card>
       <Button title="Save settings" icon="checkmark" onPress={save} />
+      <View style={{ alignItems: 'center', marginTop: 32, opacity: 0.85 }}>
+        <Image source={require('../../assets/logo.png')} style={{ width: 56, height: 51 }} accessibilityLabel="noveltyOS logo" />
+        <Text style={{ fontWeight: '800', color: colors.primary, marginTop: 6 }}>noveltyOS</Text>
+        <Text style={{ color: colors.muted, fontSize: 12 }}>Version {Constants.expoConfig?.version ?? '1.0.0'}</Text>
+      </View>
     </Screen>
   );
 }

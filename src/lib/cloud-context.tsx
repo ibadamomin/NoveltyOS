@@ -6,7 +6,7 @@ import { countUnsynced, getMeta, markAllDirty, onDataChange, setMeta, wipeLocalD
 import { deleteMyAccount, supabase, supabaseRemote, type Business } from './supabase';
 import { syncOnce } from './sync';
 
-export type CloudStatus = 'not-configured' | 'signed-out' | 'no-business' | 'synced' | 'syncing' | 'offline' | 'error';
+export type CloudStatus = 'not-configured' | 'loading' | 'signed-out' | 'no-business' | 'synced' | 'syncing' | 'offline' | 'error';
 
 /** How to treat data already on this phone when linking it to a cloud business. */
 export type LinkMode = 'upload-all' | 'merge' | 'replace';
@@ -138,7 +138,9 @@ export function CloudProvider({ children }: { children: ReactNode }) {
 
   const status: CloudStatus = !supabase
     ? 'not-configured'
-    : !session
+    : !ready
+      ? 'loading'
+      : !session
       ? 'signed-out'
       : !business
         ? 'no-business'

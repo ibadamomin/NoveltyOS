@@ -26,7 +26,7 @@ export default function SettingsScreen() {
   return (
     <Screen>
       <Card style={{ paddingVertical: 4 }}>
-        <ListRow icon="cloud-outline" title="Cloud backup & sync" subtitle="Back up your records and use more than one phone" onPress={() => router.push('/account')} />
+        <ListRow icon="cloud-outline" title="Account & sync" subtitle="Sync status, invite code, sign out" onPress={() => router.push('/account')} />
       </Card>
       <Text style={{ color: colors.muted, marginBottom: 12 }}>These details appear on every invoice and receipt.</Text>
       <Card>

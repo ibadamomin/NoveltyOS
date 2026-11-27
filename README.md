@@ -9,7 +9,8 @@ or the back of a car. Scan a barcode or QR code when stock arrives, scan it agai
 stock, cash, customer balances and supplier balances in sync, so there's nothing to balance by hand.
 
 - **One codebase for iOS and Android:** Expo / React Native.
-- **Offline-first:** every phone has its own SQLite database and works without signal.
+- **Cloud-first, login required:** every user signs in before the app opens, and all business data lives in the cloud.
+  Each phone keeps only a synced working copy (erased on sign-out), so scanning and selling keep working with a weak signal.
 - **Cloud backup and multi-phone sync:** Supabase (Postgres plus login). Each business's data is isolated with row-level security.
 
 ---
@@ -24,7 +25,7 @@ stock, cash, customer balances and supplier balances in sync, so there's nothing
 | **Accounts** | Customers and suppliers with live balances, one-tap **cash payments**, full history, shareable account statements, and starting balances for debts from before noveltyOS. |
 | **Inventory** | Search or scan to find a product. Colour-coded stock levels, low-stock alerts and a history of every movement. Items without barcodes are supported. |
 | **Dashboard** | Sales, profit, cash in, cash out and **net cash** (what the cash box should have changed by), for today, 7 days or 30 days. Also shows total receivable, total payable and stock value. |
-| **Cloud backup and sync** | Create an account and your records are backed up. Add more phones or employees with an **invite code**. Changes sync automatically within seconds when online. |
+| **Accounts & cloud sync** | Sign in with email and password (email confirmed with a 6-digit code). Every record is saved to the cloud automatically. Add more phones or employees with an **invite code**. Changes sync automatically within seconds when online. |
 | **Fixing mistakes** | Void a sale or purchase, or delete a payment. Stock and balances correct themselves. |
 
 ### Why the numbers always balance
@@ -39,7 +40,7 @@ stock, cash, customer balances and supplier balances in sync, so there's nothing
 
 ---
 
-## Run it on your phone (5 minutes, no cloud needed)
+## Run it on your phone
 
 1. Install **Expo Go** from the App Store or Google Play.
 2. On a computer with Node.js 20 or later:
@@ -49,7 +50,7 @@ stock, cash, customer balances and supplier balances in sync, so there's nothing
    ```
 3. Scan the QR code with your phone's camera (iPhone) or with the Expo Go app (Android).
 
-Without cloud settings, noveltyOS runs fully offline and the cloud screen says sync isn't set up.
+noveltyOS needs its cloud settings to sign in (see the next section). Without them it shows "This build isn't connected to the cloud".
 
 ## Turn on the cloud (Supabase, free tier is enough to start)
 
@@ -59,8 +60,15 @@ Without cloud settings, noveltyOS runs fully offline and the cloud screen says s
    Or, with the Supabase CLI: `npx supabase link` then `npx supabase db push`.
 3. Configure login in **Authentication**:
    - Keep the **Email** provider enabled.
-   - **Email Templates → Reset Password:** add `{{ .Token }}` to the message. The app's "Forgot password" flow asks for this 6-digit code.
+   - **Emails → Templates → Confirm signup:** replace the link with the code. The app asks new users to type it in,
+     so no website or link is needed. For example:
+     `<h2>Welcome to noveltyOS</h2><p>Your confirmation code is: <strong>{{ .Token }}</strong></p>`
+   - **Emails → Templates → Reset password:** the same idea, for example
+     `<p>Your noveltyOS password reset code is: <strong>{{ .Token }}</strong></p>`
    - Optional: turn off **Confirm email** if you want new users to start immediately.
+   - **Before real customers sign up:** Supabase's built-in email sender is meant for testing only. It sends to your
+     project's team members and only a few emails per hour. Under **Authentication → Emails → SMTP settings**, connect an
+     email service such as Resend, SendGrid or Amazon SES so every customer gets their codes.
 4. Connect the app. Copy `.env.example` to `.env` and fill in the **Project URL** and **anon / publishable key** from
    *Project Settings → API*, then restart `npx expo start`.
    The anon key is designed to ship inside apps; the database's row-level security is what protects the data.

@@ -87,6 +87,15 @@ function NotConfigured() {
 
 type AuthMode = 'signin' | 'signup' | 'verify' | 'reset';
 
+/** Same rule the Supabase project should enforce (Authentication → Providers → Email → password requirements). */
+function passwordProblem(pw: string): string | null {
+  if (pw.length < 8) return 'Use at least 8 characters for your password.';
+  if (!/[A-Za-z]/.test(pw) || !/[0-9]/.test(pw)) return 'Use both letters and numbers in your password.';
+  return null;
+}
+
+const RESEND_WAIT_SECONDS = 60;
+
 function AuthForm() {
   const [mode, setMode] = useState<AuthMode>('signin');
   const [email, setEmail] = useState('');
@@ -95,11 +104,19 @@ function AuthForm() {
   const [code, setCode] = useState('');
   const [resetCodeSent, setResetCodeSent] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [resendIn, setResendIn] = useState(0);
+
+  // Count down before another code can be requested (protects inboxes and the email quota).
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendIn]);
 
   const cleanEmail = email.trim().toLowerCase();
 
   const run = async (fn: () => Promise<void>) => {
-    if (!cleanEmail) return Alert.alert('Enter your email');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) return Alert.alert('Enter a valid email address');
     setBusy(true);
     try {
       await fn();
@@ -110,13 +127,14 @@ function AuthForm() {
     }
   };
 
-  const goVerify = async (resend: boolean) => {
+  const goVerify = async (sendNewCode: boolean) => {
     setCode('');
     setMode('verify');
-    if (resend) {
+    if (sendNewCode) {
       const { error } = await supabase!.auth.resend({ type: 'signup', email: cleanEmail });
       if (error) throw error;
     }
+    setResendIn(RESEND_WAIT_SECONDS);
   };
 
   const signIn = () =>
@@ -125,45 +143,34 @@ function AuthForm() {
       const { error } = await supabase!.auth.signInWithPassword({ email: cleanEmail, password });
       if (error && /not confirmed/i.test(error.message)) {
         await goVerify(true);
-        Alert.alert('Confirm your email', `We've sent a new confirmation email to ${cleanEmail}. Tap its link (or enter its code), then come back.`);
+        Alert.alert('Confirm your email', `We've emailed a new code to ${cleanEmail}. Enter it to finish signing in.`);
         return;
       }
-      if (error) throw error;
+      if (error) throw new Error('Wrong email or password.');
     });
 
   const signUp = () =>
     run(async () => {
-      if (password.length < 8) throw new Error('Use at least 8 characters for your password.');
+      const problem = passwordProblem(password);
+      if (problem) throw new Error(problem);
       const { data, error } = await supabase!.auth.signUp({ email: cleanEmail, password });
       if (error) throw error;
-      if (!data.session) await goVerify(false); // email confirmation is on: enter the emailed code
+      if (!data.session) await goVerify(false); // Supabase emailed a confirmation code
     });
 
   const verify = () =>
     run(async () => {
-      if (!code.trim()) throw new Error('Enter the code from the email, or tap the link in the email and use "I\'ve confirmed — continue".');
-      const { error } = await supabase!.auth.verifyOtp({ email: cleanEmail, token: code.trim(), type: 'signup' });
-      if (error) throw error;
+      if (!/^\d{6,10}$/.test(code)) throw new Error('Enter the code from the email.');
+      const { error } = await supabase!.auth.verifyOtp({ email: cleanEmail, token: code, type: 'signup' });
+      if (error) throw new Error('That code is wrong or has expired. Check the latest email, or send a new code.');
       // Signed in: the gate moves on to business setup automatically.
-    });
-
-  const continueAfterLink = () =>
-    run(async () => {
-      if (!password) {
-        setMode('signin');
-        return;
-      }
-      const { error } = await supabase!.auth.signInWithPassword({ email: cleanEmail, password });
-      if (error && /not confirmed/i.test(error.message)) {
-        throw new Error("Your email isn't confirmed yet. Open the email from noveltyOS and tap the link (or enter the code), then try again.");
-      }
-      if (error) throw error;
     });
 
   const resendCode = () =>
     run(async () => {
+      if (resendIn > 0) return;
       await goVerify(true);
-      Alert.alert('Email sent', `Check ${cleanEmail} for a new confirmation email.`);
+      Alert.alert('Code sent', `Check ${cleanEmail} for a new code.`);
     });
 
   const sendReset = () =>
@@ -171,13 +178,18 @@ function AuthForm() {
       const { error } = await supabase!.auth.resetPasswordForEmail(cleanEmail);
       if (error) throw error;
       setResetCodeSent(true);
+      setResendIn(RESEND_WAIT_SECONDS);
+      // Same message whether or not the account exists, so nobody can test which emails are registered.
+      Alert.alert('Check your email', `If ${cleanEmail} has a noveltyOS account, we've sent it a reset code.`);
     });
 
   const finishReset = () =>
     run(async () => {
-      if (password.length < 8) throw new Error('Use at least 8 characters for your new password.');
-      const { error } = await supabase!.auth.verifyOtp({ email: cleanEmail, token: code.trim(), type: 'recovery' });
-      if (error) throw error;
+      if (!/^\d{6,10}$/.test(code)) throw new Error('Enter the code from the email.');
+      const problem = passwordProblem(password);
+      if (problem) throw new Error(problem);
+      const { error } = await supabase!.auth.verifyOtp({ email: cleanEmail, token: code, type: 'recovery' });
+      if (error) throw new Error('That code is wrong or has expired. Request a new one.');
       const { error: e2 } = await supabase!.auth.updateUser({ password });
       if (e2) throw e2;
     });
@@ -219,28 +231,32 @@ function AuthForm() {
     />
   );
 
+  const resendButton = (
+    <Button
+      title={resendIn > 0 ? `Send a new code in ${resendIn}s` : 'Send a new code'}
+      variant="ghost"
+      disabled={resendIn > 0}
+      onPress={mode === 'reset' ? sendReset : resendCode}
+    />
+  );
+
+  const PASSWORD_HINT = 'At least 8 characters, with letters and numbers';
+
   if (mode === 'verify') {
     return (
       <>
         <Brand subtitle="Confirm your email" />
         <Card>
-          <Text style={{ fontSize: 16, marginBottom: 6 }}>
-            We sent an email to <Text style={{ fontWeight: '700' }}>{cleanEmail}</Text>.
+          <Text style={{ fontSize: 16, marginBottom: 14 }}>
+            We emailed a code to <Text style={{ fontWeight: '700' }}>{cleanEmail}</Text>. Enter it below.
           </Text>
-          <Text style={{ fontSize: 15, color: colors.muted, marginBottom: 14 }}>
-            If it has a link, tap it, then come back here and tap the button below. If it has a code, enter it.
-          </Text>
-          <Button title="I've confirmed — continue" icon="checkmark-circle" onPress={continueAfterLink} loading={busy} />
-        </Card>
-        <Card>
           {codeField}
-          <Button title="Confirm with code" icon="keypad-outline" variant="secondary" onPress={verify} loading={busy} />
+          <Button title="Confirm & continue" icon="checkmark-circle" onPress={verify} loading={busy} />
         </Card>
-        <Button title="Send the email again" variant="ghost" onPress={resendCode} />
+        {resendButton}
         <Button title="Use a different email" variant="ghost" onPress={() => setMode('signup')} />
         <Text style={{ color: colors.muted, textAlign: 'center', marginTop: 8, fontSize: 13 }}>
-          Can&apos;t find it? Check your spam folder. After tapping the link you may see a web page; you can close it and
-          come back to the app.
+          Can&apos;t find it? Check your spam folder. Only the newest code works.
         </Text>
       </>
     );
@@ -255,7 +271,7 @@ function AuthForm() {
           {resetCodeSent && (
             <>
               {codeField}
-              {passwordField('New password', 'At least 8 characters')}
+              {passwordField('New password', PASSWORD_HINT)}
             </>
           )}
           {resetCodeSent ? (
@@ -264,6 +280,7 @@ function AuthForm() {
             <Button title="Email me a reset code" icon="mail-outline" onPress={sendReset} loading={busy} />
           )}
         </Card>
+        {resetCodeSent && resendButton}
         <Button
           title="Back to sign in"
           variant="ghost"
@@ -289,7 +306,7 @@ function AuthForm() {
       />
       <Card>
         <Field label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoComplete="email" textContentType="emailAddress" />
-        {mode === 'signin' ? passwordField('Password') : passwordField('Password', 'At least 8 characters')}
+        {mode === 'signin' ? passwordField('Password') : passwordField('Password', PASSWORD_HINT)}
         {mode === 'signin' ? (
           <Button title="Sign in" icon="log-in-outline" onPress={signIn} loading={busy} />
         ) : (

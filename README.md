@@ -58,21 +58,22 @@ noveltyOS needs its cloud settings to sign in (see the next section). Without th
 2. Create the database. In **SQL Editor**, paste and run
    [`supabase/migrations/20261118000000_noveltyos_init.sql`](supabase/migrations/20261118000000_noveltyos_init.sql).
    Or, with the Supabase CLI: `npx supabase link` then `npx supabase db push`.
-3. Configure login in **Authentication**:
-   - Keep the **Email** provider enabled.
-   - **URL Configuration → Site URL:** set it to
-     `https://github.com/ibadamomin/NoveltyOS/blob/main/docs/email-confirmed.md`, so the confirmation link in
-     Supabase's default email lands on an "Email confirmed" page instead of `localhost`. The app's confirm screen has an
-     **"I've confirmed — continue"** button for this.
-   - *(Optional, needs custom SMTP, see below)* **Emails → Templates → Confirm signup:** replace the link with the code. The app asks new users to type it in,
-     so no website or link is needed. For example:
-     `<h2>Welcome to noveltyOS</h2><p>Your confirmation code is: <strong>{{ .Token }}</strong></p>`
-   - **Emails → Templates → Reset password:** the same idea, for example
-     `<p>Your noveltyOS password reset code is: <strong>{{ .Token }}</strong></p>`
-   - Optional: turn off **Confirm email** if you want new users to start immediately.
-   - **Before real customers sign up:** Supabase's built-in email sender is meant for testing only. It sends to your
-     project's team members and only a few emails per hour. Under **Authentication → Emails → SMTP settings**, connect an
-     email service such as Resend, SendGrid or Amazon SES so every customer gets their codes.
+3. **Set up email with Resend.** Supabase's built-in email is for testing only, and template editing needs your own
+   email sender.
+   1. At [resend.com](https://resend.com) → **Domains → Add domain**. Use a subdomain of a domain you own, for example
+      `mail.yourbusiness.com`. Add the DNS records Resend shows at your domain provider and wait for **Verified**.
+   2. **API Keys → Create API key**: permission **Sending access**, restricted to that domain. Copy it; it's shown once.
+   3. In Supabase: **Authentication → Emails → SMTP Settings → Enable custom SMTP**:
+      sender email `no-reply@mail.yourbusiness.com`, sender name `noveltyOS`, host `smtp.resend.com`, port `465`,
+      username `resend`, password = the API key. Save.
+      **The API key goes only into Supabase. Never put it in the app, `.env` or GitHub.**
+   4. **Authentication → Emails → Templates**: paste the templates from
+      [`supabase/email-templates/`](supabase/email-templates/) (subjects are in its README). They contain only a
+      6-digit code and **no links**.
+   5. **Authentication → Sign In / Providers → Email**: keep **Confirm email ON**, set **Minimum password length 8**,
+      **Password requirements** = letters and digits, and **Email OTP expiration** = `900` seconds (15 minutes).
+   6. **Authentication → Rate Limits**: check the email limit. Supabase raises it once custom SMTP is on; around 100 per
+      hour suits a small business.
 4. Connect the app. Copy `.env.example` to `.env` and fill in the **Project URL** and **anon / publishable key** from
    *Project Settings → API*, then restart `npx expo start`.
    The anon key is designed to ship inside apps; the database's row-level security is what protects the data.

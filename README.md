@@ -60,7 +60,11 @@ noveltyOS needs its cloud settings to sign in (see the next section). Without th
    Or, with the Supabase CLI: `npx supabase link` then `npx supabase db push`.
 3. Configure login in **Authentication**:
    - Keep the **Email** provider enabled.
-   - **Emails → Templates → Confirm signup:** replace the link with the code. The app asks new users to type it in,
+   - **URL Configuration → Site URL:** set it to
+     `https://github.com/ibadamomin/NoveltyOS/blob/main/docs/email-confirmed.md`, so the confirmation link in
+     Supabase's default email lands on an "Email confirmed" page instead of `localhost`. The app's confirm screen has an
+     **"I've confirmed — continue"** button for this.
+   - *(Optional, needs custom SMTP, see below)* **Emails → Templates → Confirm signup:** replace the link with the code. The app asks new users to type it in,
      so no website or link is needed. For example:
      `<h2>Welcome to noveltyOS</h2><p>Your confirmation code is: <strong>{{ .Token }}</strong></p>`
    - **Emails → Templates → Reset password:** the same idea, for example

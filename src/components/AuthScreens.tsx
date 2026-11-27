@@ -125,7 +125,7 @@ function AuthForm() {
       const { error } = await supabase!.auth.signInWithPassword({ email: cleanEmail, password });
       if (error && /not confirmed/i.test(error.message)) {
         await goVerify(true);
-        Alert.alert('Confirm your email', `We've sent a new code to ${cleanEmail}. Enter it to finish signing in.`);
+        Alert.alert('Confirm your email', `We've sent a new confirmation email to ${cleanEmail}. Tap its link (or enter its code), then come back.`);
         return;
       }
       if (error) throw error;
@@ -141,16 +141,29 @@ function AuthForm() {
 
   const verify = () =>
     run(async () => {
-      if (!code.trim()) throw new Error('Enter the code from the email.');
+      if (!code.trim()) throw new Error('Enter the code from the email, or tap the link in the email and use "I\'ve confirmed — continue".');
       const { error } = await supabase!.auth.verifyOtp({ email: cleanEmail, token: code.trim(), type: 'signup' });
       if (error) throw error;
       // Signed in: the gate moves on to business setup automatically.
     });
 
+  const continueAfterLink = () =>
+    run(async () => {
+      if (!password) {
+        setMode('signin');
+        return;
+      }
+      const { error } = await supabase!.auth.signInWithPassword({ email: cleanEmail, password });
+      if (error && /not confirmed/i.test(error.message)) {
+        throw new Error("Your email isn't confirmed yet. Open the email from noveltyOS and tap the link (or enter the code), then try again.");
+      }
+      if (error) throw error;
+    });
+
   const resendCode = () =>
     run(async () => {
       await goVerify(true);
-      Alert.alert('Code sent', `Check ${cleanEmail} for a new code.`);
+      Alert.alert('Email sent', `Check ${cleanEmail} for a new confirmation email.`);
     });
 
   const sendReset = () =>
@@ -211,16 +224,23 @@ function AuthForm() {
       <>
         <Brand subtitle="Confirm your email" />
         <Card>
-          <Text style={{ fontSize: 16, marginBottom: 14 }}>
-            We sent a code to <Text style={{ fontWeight: '700' }}>{cleanEmail}</Text>. Enter it below.
+          <Text style={{ fontSize: 16, marginBottom: 6 }}>
+            We sent an email to <Text style={{ fontWeight: '700' }}>{cleanEmail}</Text>.
           </Text>
-          {codeField}
-          <Button title="Confirm & continue" icon="checkmark-circle" onPress={verify} loading={busy} />
+          <Text style={{ fontSize: 15, color: colors.muted, marginBottom: 14 }}>
+            If it has a link, tap it, then come back here and tap the button below. If it has a code, enter it.
+          </Text>
+          <Button title="I've confirmed — continue" icon="checkmark-circle" onPress={continueAfterLink} loading={busy} />
         </Card>
-        <Button title="Send a new code" variant="ghost" onPress={resendCode} />
+        <Card>
+          {codeField}
+          <Button title="Confirm with code" icon="keypad-outline" variant="secondary" onPress={verify} loading={busy} />
+        </Card>
+        <Button title="Send the email again" variant="ghost" onPress={resendCode} />
         <Button title="Use a different email" variant="ghost" onPress={() => setMode('signup')} />
         <Text style={{ color: colors.muted, textAlign: 'center', marginTop: 8, fontSize: 13 }}>
-          Can&apos;t find it? Check your spam folder. Codes expire after a while, so request a new one if needed.
+          Can&apos;t find it? Check your spam folder. After tapping the link you may see a web page; you can close it and
+          come back to the app.
         </Text>
       </>
     );

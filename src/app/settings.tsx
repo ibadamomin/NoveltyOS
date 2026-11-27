@@ -14,7 +14,11 @@ export default function SettingsScreen() {
   const save = async () => {
     if (!s.businessName.trim()) return Alert.alert('Business name required');
     if (s.taxRate && isNaN(Number(s.taxRate))) return Alert.alert('Tax rate must be a number, e.g. 8.25');
-    await update({ ...s, businessName: s.businessName.trim() });
+    try {
+      await update({ ...s, businessName: s.businessName.trim() });
+    } catch (e) {
+      return Alert.alert('Could not save settings', e instanceof Error ? e.message : String(e));
+    }
     if (router.canGoBack()) router.back();
     else router.replace('/');
   };

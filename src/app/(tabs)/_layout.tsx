@@ -20,7 +20,7 @@ export default function TabsLayout() {
         tabBarLabelStyle: { fontWeight: '600' },
       }}
     >
-      <Tabs.Screen name="index" options={tab('Home', 'home')} />
+      <Tabs.Screen name="index" options={{ ...tab('Home', 'home'), headerShown: false }} />
       <Tabs.Screen name="sell" options={tab('Sell', 'cart')} />
       <Tabs.Screen name="inventory" options={tab('Inventory', 'cube')} />
       <Tabs.Screen name="people" options={tab('Accounts', 'people')} />

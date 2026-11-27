@@ -2,7 +2,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
 import { FlatList, Text, View } from 'react-native';
-import { Button, Card, colors, Empty, ListRow, SearchBox, Segmented, styles } from '../../components/ui';
+import { Button, Card, colors, Empty, ListRow, SearchBox, Segmented, styles, keyboardDismissMode } from '../../components/ui';
 import { listParties, type Party, type PartyType } from '../../lib/db';
 import { useDataVersion } from '../../lib/use-data-version';
 import { money } from '../../lib/money';
@@ -53,6 +53,7 @@ export default function People() {
         data={rows}
         keyExtractor={(p) => String(p.id)}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={keyboardDismissMode}
         contentContainerStyle={{ paddingBottom: 32 }}
         renderItem={({ item }) => (
           <ListRow

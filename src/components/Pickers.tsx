@@ -5,7 +5,7 @@ import { Alert, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, Text
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listParties, listProducts, saveParty, getParty, type Party, type PartyType, type Product } from '../lib/db';
 import { money } from '../lib/money';
-import { Button, colors, Empty, Field, ListRow, SearchBox } from './ui';
+import { Button, colors, Empty, Field, keyboardDismissMode, KeyboardScope, ListRow, SearchBox } from './ui';
 
 function Sheet({ visible, title, onClose, children }: { visible: boolean; title: string; onClose: () => void; children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
@@ -21,7 +21,9 @@ function Sheet({ visible, title, onClose, children }: { visible: boolean; title:
             <Ionicons name="close-circle" size={30} color={colors.muted} />
           </Pressable>
         </View>
-        <View style={{ flex: 1, paddingHorizontal: 16, paddingBottom: insets.bottom }}>{children}</View>
+        <View style={{ flex: 1, paddingHorizontal: 16, paddingBottom: insets.bottom }}>
+          <KeyboardScope id="keyboard-done-sheet">{children}</KeyboardScope>
+        </View>
       </KeyboardAvoidingView>
     </Modal>
   );
@@ -86,6 +88,7 @@ function PartyPickerBody({ type, onPick, allowNone }: PartyPickerProps) {
             data={rows}
             keyExtractor={(p) => String(p.id)}
             keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={keyboardDismissMode}
             renderItem={({ item }) => (
               <ListRow
                 title={item.name}
@@ -131,6 +134,7 @@ function ProductPickerBody({ onPick }: ProductPickerProps) {
         data={rows}
         keyExtractor={(p) => String(p.id)}
         keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={keyboardDismissMode}
         renderItem={({ item }) => (
           <ListRow
             title={item.name}

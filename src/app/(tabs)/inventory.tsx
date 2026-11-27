@@ -3,7 +3,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
 import { Alert, FlatList, Text, View } from 'react-native';
 import { Scanner } from '../../components/Scanner';
-import { Button, colors, Empty, ListRow, SearchBox, styles } from '../../components/ui';
+import { Button, colors, Empty, ListRow, SearchBox, styles, keyboardDismissMode } from '../../components/ui';
 import { findByBarcode, listProducts, type Product } from '../../lib/db';
 import { useDataVersion } from '../../lib/use-data-version';
 import { money } from '../../lib/money';
@@ -54,6 +54,7 @@ export default function Inventory() {
         data={rows}
         keyExtractor={(p) => String(p.id)}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={keyboardDismissMode}
         contentContainerStyle={{ paddingBottom: 32 }}
         renderItem={({ item }) => (
           <ListRow

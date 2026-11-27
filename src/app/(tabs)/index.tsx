@@ -1,8 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router, Stack, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card, colors, Empty, ListRow, Screen, SectionTitle, Segmented, Stat, type IconName } from '../../components/ui';
 import { getSummary, startOfToday, type Summary } from '../../lib/db';
 import { money } from '../../lib/money';
@@ -26,6 +27,7 @@ export default function Home() {
   const [period, setPeriod] = useState<Period>('today');
   const [sum, setSum] = useState<Summary | null>(null);
   const version = useDataVersion();
+  const insets = useSafeAreaInsets();
   const { status } = useCloud();
   const cloudIcon =
     status === 'synced' ? 'cloud-done-outline' : status === 'syncing' ? 'cloud-upload-outline' : status === 'not-configured' || status === 'signed-out' || status === 'no-business' ? 'cloud-outline' : 'cloud-offline-outline';
@@ -38,20 +40,19 @@ export default function Home() {
   );
 
   return (
-    <Screen>
-      <Stack.Screen
-        options={{
-          title: settings.businessName,
-          headerRight: () => (
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 6 }}>
-              {status !== 'not-configured' && (
-                <HeaderIconButton icon={cloudIcon} label="Cloud backup and sync" onPress={() => router.push('/account')} />
-              )}
-              <HeaderIconButton icon="settings-outline" label="Settings" onPress={() => router.push('/settings')} />
-            </View>
-          ),
-        }}
-      />
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+      {/* Top bar drawn by the screen itself (not the navigation header), so its buttons are
+          ordinary in-screen buttons like "New Sale". */}
+      <View style={[homeStyles.bar, { paddingTop: insets.top }]}>
+        <Text style={homeStyles.title} numberOfLines={1} accessibilityRole="header">
+          {settings.businessName}
+        </Text>
+        {status !== 'not-configured' && (
+          <HeaderIconButton icon={cloudIcon} label="Cloud backup and sync" onPress={() => router.push('/account')} />
+        )}
+        <HeaderIconButton icon="settings-outline" label="Settings" onPress={() => router.push('/settings')} />
+      </View>
+      <Screen>
 
       <View style={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}>
         <Button title="New Sale" icon="cart" onPress={() => router.navigate('/sell')} style={{ flex: 1 }} />
@@ -125,7 +126,8 @@ export default function Home() {
           onPress={() => router.push('/settings')}
         />
       </Card>
-    </Screen>
+      </Screen>
+    </View>
   );
 }
 
@@ -149,3 +151,15 @@ function HeaderIconButton({ icon, label, onPress }: { icon: IconName; label: str
     </Pressable>
   );
 }
+
+const homeStyles = StyleSheet.create({
+  bar: {
+    backgroundColor: colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 16,
+    paddingRight: 6,
+    minHeight: 56,
+  },
+  title: { flex: 1, color: '#fff', fontSize: 20, fontWeight: '700', paddingVertical: 14 },
+});

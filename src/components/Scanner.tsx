@@ -3,7 +3,7 @@ import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'ex
 import { useRef, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { brand, Button, colors } from './ui';
+import { brand, Button, colors, KeyboardScope, useKeyboardBarId } from './ui';
 
 type Props = {
   visible: boolean;
@@ -20,7 +20,11 @@ const BARCODE_TYPES = ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128', 'code39', '
 export function Scanner(props: Props) {
   return (
     <Modal visible={props.visible} animationType="slide" onRequestClose={props.onClose} presentationStyle="fullScreen">
-      {props.visible && <ScannerBody {...props} />}
+      {props.visible && (
+        <KeyboardScope id="keyboard-done-scanner">
+          <ScannerBody {...props} />
+        </KeyboardScope>
+      )}
     </Modal>
   );
 }
@@ -33,6 +37,7 @@ function ScannerBody({ onClose, onScanned, continuous, title = 'Scan barcode' }:
   const busy = useRef(false);
   const last = useRef<{ code: string; at: number }>({ code: '', at: 0 });
   const insets = useSafeAreaInsets();
+  const keyboardBarId = useKeyboardBarId();
 
 
   const handle = async (raw: string, fromCamera: boolean) => {
@@ -114,6 +119,7 @@ function ScannerBody({ onClose, onScanned, continuous, title = 'Scan barcode' }:
               autoCapitalize="none"
               autoCorrect={false}
               returnKeyType="done"
+              inputAccessoryViewID={keyboardBarId}
               onSubmitEditing={() => {
                 handle(manual, false);
                 setManual('');

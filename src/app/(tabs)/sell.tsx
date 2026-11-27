@@ -5,7 +5,7 @@ import { useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { PartyPicker, ProductPicker } from '../../components/Pickers';
 import { Scanner } from '../../components/Scanner';
-import { Button, Card, colors, Empty, Field, Screen, SectionTitle, Segmented, TotalLine } from '../../components/ui';
+import { Button, Card, colors, Empty, Field, Screen, SectionTitle, Segmented, TotalLine, useKeyboardBarId } from '../../components/ui';
 import { createInvoice, findByBarcode, taxRatePercent, type Party, type PayMethod, type Product } from '../../lib/db';
 import { centsToInput, money, parseMoney } from '../../lib/money';
 import { useSettings } from '../../lib/settings-context';
@@ -37,6 +37,7 @@ export default function Sell() {
   const [scanning, setScanning] = useState(false);
   const [picking, setPicking] = useState<'product' | 'customer' | null>(null);
   const [saving, setSaving] = useState(false);
+  const keyboardBarId = useKeyboardBarId();
 
   const rate = taxRatePercent(settings);
   const subtotal = lines.reduce((s, l) => s + l.qty * l.unit_price, 0);
@@ -169,6 +170,7 @@ export default function Sell() {
                     style={s.priceInput}
                     placeholder="0.00"
                     selectTextOnFocus
+                    inputAccessoryViewID={keyboardBarId}
                   />
                   <Text style={{ color: colors.muted }}>each</Text>
                 </View>

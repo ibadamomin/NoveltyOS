@@ -2,7 +2,7 @@ import { Stack } from 'expo-router/stack';
 import { SQLiteProvider } from 'expo-sqlite';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { colors } from '../components/ui';
+import { colors, KeyboardDoneBar } from '../components/ui';
 import { CloudProvider } from '../lib/cloud-context';
 import { migrate } from '../lib/db';
 import { SettingsProvider } from '../lib/settings-context';
@@ -14,6 +14,7 @@ export default function RootLayout() {
         <SettingsProvider>
           <CloudProvider>
           <StatusBar style="light" />
+          <KeyboardDoneBar />
           <Stack
             screenOptions={{
               headerStyle: { backgroundColor: colors.primary },

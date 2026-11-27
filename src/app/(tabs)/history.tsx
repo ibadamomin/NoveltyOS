@@ -2,7 +2,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
 import { FlatList, View } from 'react-native';
-import { colors, Empty, ListRow, SearchBox, Segmented, styles } from '../../components/ui';
+import { colors, Empty, ListRow, SearchBox, Segmented, styles, keyboardDismissMode } from '../../components/ui';
 import { invoiceNumber, listInvoices, type Invoice, type InvoiceKind } from '../../lib/db';
 import { useDataVersion } from '../../lib/use-data-version';
 import { formatDateTime, money } from '../../lib/money';
@@ -37,6 +37,7 @@ export default function History() {
         data={rows}
         keyExtractor={(i) => String(i.id)}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode={keyboardDismissMode}
         contentContainerStyle={{ paddingBottom: 32 }}
         renderItem={({ item }) => {
           const due = item.total - item.paid;

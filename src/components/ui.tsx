@@ -1,7 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import type { ComponentProps, ReactNode } from 'react';
+import { createContext, useContext, type ComponentProps, type ReactNode } from 'react';
 import {
   ActivityIndicator,
+  InputAccessoryView,
+  Keyboard,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -41,6 +44,51 @@ export const colors = {
 
 export type IconName = ComponentProps<typeof Ionicons>['name'];
 
+// ---------------------------------------------------------------------------
+// Keyboard "Done" bar (iPhone). Number keyboards on iOS have no return key, so every
+// text field gets a bar above the keyboard with a Done button that hides it.
+// Android keyboards have their own hide key, so nothing is shown there.
+// ---------------------------------------------------------------------------
+
+const KeyboardBarContext = createContext('keyboard-done');
+
+/** The id text inputs should pass as `inputAccessoryViewID` (undefined off iOS). */
+export function useKeyboardBarId() {
+  const id = useContext(KeyboardBarContext);
+  return Platform.OS === 'ios' ? id : undefined;
+}
+
+export function KeyboardDoneBar({ nativeID = 'keyboard-done' }: { nativeID?: string }) {
+  if (Platform.OS !== 'ios') return null;
+  return (
+    <InputAccessoryView nativeID={nativeID}>
+      <View style={styles.kbBar}>
+        <Pressable
+          onPress={() => Keyboard.dismiss()}
+          accessibilityRole="button"
+          accessibilityLabel="Hide keyboard"
+          style={({ pressed }) => [styles.kbDone, pressed && { opacity: 0.5 }]}
+        >
+          <Text style={styles.kbDoneText}>Done</Text>
+        </Pressable>
+      </View>
+    </InputAccessoryView>
+  );
+}
+
+/** Use inside pop-up screens (Modals), which need their own Done bar. */
+export function KeyboardScope({ id, children }: { id: string; children: ReactNode }) {
+  return (
+    <KeyboardBarContext.Provider value={id}>
+      {children}
+      <KeyboardDoneBar nativeID={id} />
+    </KeyboardBarContext.Provider>
+  );
+}
+
+/** Swiping down on a screen hides the keyboard. */
+export const keyboardDismissMode = Platform.OS === 'ios' ? ('interactive' as const) : ('on-drag' as const);
+
 export function Screen({ children, scroll = true }: { children: ReactNode; scroll?: boolean }) {
   if (!scroll) return <View style={[styles.screen, styles.screenPad]}>{children}</View>;
   return (
@@ -48,6 +96,7 @@ export function Screen({ children, scroll = true }: { children: ReactNode; scrol
       style={styles.screen}
       contentContainerStyle={[styles.screenPad, { paddingBottom: 48 }]}
       keyboardShouldPersistTaps="handled"
+      keyboardDismissMode={keyboardDismissMode}
     >
       {children}
     </ScrollView>
@@ -129,10 +178,11 @@ export function Field({
   style,
   ...input
 }: TextInputProps & { label: string; hint?: string; style?: ViewStyle }) {
+  const keyboardBarId = useKeyboardBarId();
   return (
     <View style={[{ marginBottom: 14 }, style]}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
-      <TextInput placeholderTextColor="#9ca3af" style={styles.input} {...input} />
+      <TextInput placeholderTextColor="#9ca3af" style={styles.input} inputAccessoryViewID={keyboardBarId} {...input} />
       {hint ? <Text style={styles.hint}>{hint}</Text> : null}
     </View>
   );
@@ -241,6 +291,7 @@ export function TotalLine({ label, value, strong }: { label: string; value: stri
 }
 
 export function SearchBox(props: TextInputProps) {
+  const keyboardBarId = useKeyboardBarId();
   return (
     <View style={styles.search}>
       <Ionicons name="search" size={18} color={colors.muted} />
@@ -249,6 +300,8 @@ export function SearchBox(props: TextInputProps) {
         style={{ flex: 1, fontSize: 16, paddingVertical: 10, color: colors.text }}
         autoCorrect={false}
         clearButtonMode="while-editing"
+        returnKeyType="done"
+        inputAccessoryViewID={keyboardBarId}
         {...props}
       />
     </View>
@@ -333,6 +386,15 @@ export const styles = StyleSheet.create({
   totalLabel: { fontSize: 16, color: colors.muted },
   totalValue: { fontSize: 16, color: colors.text, fontWeight: '600' },
   totalStrong: { fontSize: 20, fontWeight: '800', color: colors.text },
+  kbBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    backgroundColor: '#F1F3F5',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#C7CBD1',
+  },
+  kbDone: { paddingHorizontal: 18, height: 44, justifyContent: 'center' },
+  kbDoneText: { fontSize: 17, fontWeight: '700', color: colors.primary },
   search: {
     flexDirection: 'row',
     alignItems: 'center',

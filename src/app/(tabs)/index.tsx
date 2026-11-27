@@ -3,7 +3,7 @@ import { router, Stack, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { Button, Card, colors, Empty, ListRow, Screen, SectionTitle, Segmented, Stat } from '../../components/ui';
+import { Button, Card, colors, Empty, ListRow, Screen, SectionTitle, Segmented, Stat, type IconName } from '../../components/ui';
 import { getSummary, startOfToday, type Summary } from '../../lib/db';
 import { money } from '../../lib/money';
 import { useCloud } from '../../lib/cloud-context';
@@ -43,15 +43,11 @@ export default function Home() {
         options={{
           title: settings.businessName,
           headerRight: () => (
-            <View style={{ flexDirection: 'row', gap: 20, marginRight: 16 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 6 }}>
               {status !== 'not-configured' && (
-                <Pressable onPress={() => router.push('/account')} hitSlop={12} accessibilityLabel="Cloud backup and sync">
-                  <Ionicons name={cloudIcon} size={25} color="#fff" />
-                </Pressable>
+                <HeaderIconButton icon={cloudIcon} label="Cloud backup and sync" onPress={() => router.push('/account')} />
               )}
-              <Pressable onPress={() => router.push('/settings')} hitSlop={12} accessibilityLabel="Settings">
-                <Ionicons name="settings-outline" size={24} color="#fff" />
-              </Pressable>
+              <HeaderIconButton icon="settings-outline" label="Settings" onPress={() => router.push('/settings')} />
             </View>
           ),
         }}
@@ -120,6 +116,36 @@ export default function Home() {
           </Card>
         </>
       )}
+
+      <Card style={{ paddingVertical: 4, marginTop: 8 }}>
+        <ListRow
+          icon="settings-outline"
+          title="Business settings"
+          subtitle="Name, address, sales tax, cloud backup"
+          onPress={() => router.push('/settings')}
+        />
+      </Card>
     </Screen>
+  );
+}
+
+/** Header icon with a full 44x44 touch area (Apple's minimum) and visible press feedback. */
+function HeaderIconButton({ icon, label, onPress }: { icon: IconName; label: string; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => ({
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: pressed ? 'rgba(255,255,255,0.18)' : 'transparent',
+      })}
+    >
+      <Ionicons name={icon} size={24} color="#fff" />
+    </Pressable>
   );
 }

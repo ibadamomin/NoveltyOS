@@ -139,7 +139,7 @@ GitHub Pages from a separate public repo, Google Sites, or your business website
 
 1. `[ ]` Fill in the `[PLACEHOLDERS]` in `docs/privacy-policy.md` and `docs/delete-account.md`, then commit.
 2. `[ ]` Set up the production Supabase project (README → "Turn on the cloud"), including **both** migrations in `supabase/migrations/`.
-3. `[ ]` Add `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` as EAS environment variables for the
+3. `[ ]` Add `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_KEY` as EAS environment variables for the
    **production** and **preview** environments (expo.dev → project → Environment variables).
 4. `[ ]` Build: `npx eas-cli@latest build --platform android --profile production` (EAS creates and stores your upload key).
 5. `[ ]` In Play Console, **create the app**, then upload the `.aab` **manually** to a testing track. Google requires the

@@ -5,7 +5,9 @@ import type { SyncTable } from './db';
 import type { Remote, Row } from './sync';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const key = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+// Supabase's dashboard calls this the "publishable" key (EXPO_PUBLIC_SUPABASE_KEY in its Expo snippet);
+// older projects call it the "anon" key. Both names work. Never use the secret / service_role key here.
+const key = process.env.EXPO_PUBLIC_SUPABASE_KEY ?? process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 /** null when the app was built without cloud settings (it then works fully offline). */
 export const supabase: SupabaseClient | null =

@@ -28,7 +28,7 @@ export default function AccountScreen() {
           <Text style={{ fontSize: 17, fontWeight: '700', marginBottom: 6 }}>Cloud sync is not set up</Text>
           <Text style={{ color: colors.muted }}>
             This copy of noveltyOS works fully offline. To enable cloud backup and multi-phone sync, the app needs to be built with
-            the Supabase settings described in the README (EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY).
+            the Supabase settings described in the README (EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_KEY).
           </Text>
         </Card>
       ) : status === 'signed-out' ? (

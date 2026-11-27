@@ -96,7 +96,7 @@ Builds run in the cloud with EAS, so you don't need a Mac. You need an Apple Dev
 ```bash
 npx eas-cli@latest login
 npx eas-cli@latest build:configure
-# Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY as EAS environment variables
+# Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_KEY as EAS environment variables
 # (expo.dev → your project → Environment variables; see https://docs.expo.dev/eas/environment-variables/)
 npx eas-cli@latest build --platform all
 npx eas-cli@latest submit --platform ios
